@@ -1,8 +1,7 @@
-import 'package:catat_lari/models/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'register_screen.dart';
-import 'main_page.dart'; // Halaman Home setelah login
+import 'main_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,11 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  InputDecoration _inputDecoration(
-    String hint,
-    IconData icon, {
-    Widget? suffixIcon,
-  }) {
+  InputDecoration _inputDecoration(String hint, IconData icon, {Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[600]),
@@ -37,10 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       filled: true,
       fillColor: Colors.grey[900],
       contentPadding: const EdgeInsets.symmetric(vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[700]!),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey[700]!),
@@ -54,10 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Tahap 3 baru cek ke DB. Sekarang langsung ke Home
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        MaterialPageRoute(builder: (_) => const MainPage()),
       );
     }
   }
@@ -68,14 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 60),
-                // Title
+
                 Text(
                   'Welcome Back!',
                   style: GoogleFonts.inter(
@@ -84,7 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.white,
                   ),
                 ),
+
                 const SizedBox(height: 8),
+
                 Text(
                   'We missed you! Login to\ncontinue to share your\nexperience with us!',
                   style: TextStyle(
@@ -93,100 +86,88 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 1.5,
                   ),
                 ),
+
                 const SizedBox(height: 40),
 
-                // Email
                 TextFormField(
                   controller: _emailController,
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.emailAddress,
-                  decoration: _inputDecoration(
-                    'Your Email',
-                    Icons.alternate_email,
-                  ),
+                  decoration: _inputDecoration('Your Email', Icons.alternate_email),
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Email tidak boleh kosong';
-                    if (!value.contains('@')) return 'Email tidak valid';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Email tidak valid';
+                    }
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 16),
 
-                // Password + Teks SIGN IN vertikal
-                Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    TextFormField(
-                      controller: _passwordController,
-                      style: const TextStyle(color: Colors.white),
-                      obscureText: _obscurePassword,
-                      decoration: _inputDecoration(
-                        'Your Password',
-                        Icons.password,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.grey[600],
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                        ),
+                TextFormField(
+                  controller: _passwordController,
+                  style: const TextStyle(color: Colors.white),
+                  obscureText: _obscurePassword,
+                  decoration: _inputDecoration(
+                    'Your Password',
+                    Icons.password,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey[600],
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty)
-                          return 'Password tidak boleh kosong';
-                        return null;
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
                       },
                     ),
-                    // Teks SIGN IN vertikal
-                    Positioned(
-                      right: -8,
-                      child: RotatedBox(
-                        quarterTurns: 1,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const RegisterScreen(),
-                              ),
-                            );
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'SIGN IN',
-                              style: TextStyle(
-                                color: Color(0xFFCCFF00),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 4,
-                              ),
-                            ),
-                          ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Password tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    Text(
+                      "DON'T HAVE AN ACCOUNT YET? ",
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'SIGN IN',
+                        style: TextStyle(
+                          color: Color(0xFFCCFF00),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          letterSpacing: 1,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
 
-                // Teks DON'T HAVE AN ACCOUNT YET?
-                Text(
-                  "DON'T HAVE AN ACCOUNT YET?",
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  ),
-                ),
                 const SizedBox(height: 24),
 
-                // Tombol LOG IN
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -208,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 40),
               ],
             ),

@@ -95,9 +95,15 @@ class _EditRunScreenState extends State<EditRunScreen> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Data lari berhasil diupdate!'),
-          backgroundColor: Color(0xFFCCFF00),
+        content: Text(
+          'Data lari berhasil diupdate!',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        backgroundColor: Color(0xFFCCFF00),
+      ),
       );
     }
   }

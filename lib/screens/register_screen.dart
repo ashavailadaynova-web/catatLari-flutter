@@ -1,4 +1,3 @@
-import 'package:catat_lari/models/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login_screen.dart';
@@ -59,14 +58,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _createAccount() {
-    if (_formKey.currentState!.validate()) {
-      // Langsung ke Home setelah validasi sukses
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-      );
-    }
+  if (_formKey.currentState!.validate()) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainPage()),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

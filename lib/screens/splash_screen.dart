@@ -49,23 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
             ),
-            Text(
-              'C',
-              style: TextStyle(
-                fontSize: 60,
-                fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
-                color: const Color(0xFFCCFF00),
-                shadows: [
-                  Shadow(
-                    blurRadius: 20.0,
-                    color: const Color(0xFFCCFF00).withOpacity(0.8),
-                    offset: const Offset(0, 0),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
             // Teks PUSH YOUR LIMITS
             const Text(
               'P U S H   Y O U R   L I M I T S',
