@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart'; // buat format tanggal
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart'; // 1. Import provider
+import '../viewmodels/run_viewmodel.dart'; // 2. Import ViewModel
+import '../models/run_model.dart'; // 3. Import Model
 
 class AddRunScreen extends StatefulWidget {
   const AddRunScreen({super.key});
@@ -36,10 +39,10 @@ class _AddRunScreenState extends State<AddRunScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFCCFF00), // Warna header & tanggal dipilih
-              onPrimary: Colors.black, // Warna teks di header
-              surface: Colors.black, // Background kalender
-              onSurface: Colors.white, // Warna teks tanggal
+              primary: Color(0xFFCCFF00),
+              onPrimary: Colors.black,
+              surface: Colors.black,
+              onSurface: Colors.white,
             ),
             dialogBackgroundColor: Colors.grey[900],
           ),
@@ -74,10 +77,24 @@ class _AddRunScreenState extends State<AddRunScreen> {
     );
   }
 
+  // 4. UBAH FUNGSI INI
   void _saveRun() {
     if (_formKey.currentState!.validate()) {
-      // Tahap 3 baru simpen ke DB. Sekarang balik ke Home aja
-      Navigator.pop(context); // Balik ke Home
+      // 1. Ambil data dari controller dan pastikan formatnya benar
+      final newRun = RunModel(
+        // id dikosongkan karena akan diisi otomatis oleh Database (AUTOINCREMENT)
+        date: _dateController.text,
+        distance: double.tryParse(_distanceController.text) ?? 0.0,
+        duration: _durationController.text,
+        notes: "", // Kasih string kosong biar nggak null
+      );
+
+      // 2. Panggil fungsi addRun dari ViewModel
+      context.read<RunViewModel>().addRun(newRun);
+
+      // 3. Kembali ke halaman utama
+      Navigator.pop(context);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Lari berhasil dicatat!'),

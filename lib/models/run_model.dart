@@ -36,7 +36,8 @@ class RunModel {
   factory RunModel.fromMap(Map<String, dynamic> map) {
     return RunModel(
       id: map['id'],
-      distance: map['distance'],
+      // Gunakan .toDouble() supaya aman kalau DB ngasih angka int
+      distance: (map['distance'] as num).toDouble(),
       duration: map['duration'],
       date: map['date'],
       notes: map['notes'],

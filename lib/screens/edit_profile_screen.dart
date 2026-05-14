@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // 1. Import provider
+import '../viewmodels/profile_viewmodel.dart'; // 2. Import Profile ViewModel
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -8,14 +10,29 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // Controller buat ambil teks dari inputan
-  final _nameController = TextEditingController(text: "Lee Jeno");
-  final _locationController = TextEditingController(text: "Surabaya");
+  late TextEditingController _nameController;
+  late TextEditingController _locationController;
+
+  @override
+  void initState() {
+    super.initState();
+    // 3. Ambil data dari ViewModel buat ditampilin di form
+    final profile = context.read<ProfileViewModel>();
+    _nameController = TextEditingController(text: profile.userName);
+    _locationController = TextEditingController(text: profile.location);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Samain temanya
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text("Edit Profile"),
         backgroundColor: Colors.black,
@@ -24,25 +41,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Contoh Input Nama
             TextField(
               controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: "Full Name",
-                labelStyle: TextStyle(color: Color(0xFFD4FF00)), // Warna lime
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                labelStyle: TextStyle(color: Color(0xFFD4FF00)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            // Contoh Input Lokasi
             TextField(
               controller: _locationController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: "Location",
                 labelStyle: TextStyle(color: Color(0xFFD4FF00)),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -50,12 +69,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4FF00)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD4FF00),
+                ),
                 onPressed: () {
-                  // Logika simpan di sini
-                  Navigator.pop(context); 
+                  // 4. Update data profil ke ViewModel
+                  context.read<ProfileViewModel>().updateProfile(
+                    _nameController.text,
+                    _locationController.text,
+                  );
+
+                  Navigator.pop(context);
+
+                  // Opsional: Kasih feedback snackbar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Profil berhasil diperbarui!',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      backgroundColor: Color(0xFFD4FF00),
+                    ),
+                  );
                 },
-                child: const Text("SAVE CHANGES", style: TextStyle(color: Colors.black)),
+                child: const Text(
+                  "SAVE CHANGES",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ],

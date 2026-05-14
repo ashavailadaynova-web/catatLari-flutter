@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart'; // 1. Import provider
+import '../viewmodels/auth_viewmodel.dart'; // 2. Import AuthViewModel
+import '../viewmodels/profile_viewmodel.dart'; // 3. Import ProfileViewModel
 import 'login_screen.dart';
-import 'main_page.dart'; // Ganti ke Home setelah register sukses
+import 'main_page.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -57,14 +60,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  // 4. UBAH FUNGSI CREATE ACCOUNT
   void _createAccount() {
-  if (_formKey.currentState!.validate()) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MainPage()),
-    );
+    if (_formKey.currentState!.validate()) {
+      // Lokasi dikosongin dulu karena user belum ngisi
+      context.read<ProfileViewModel>().updateProfile(
+        _nameController.text,
+        "", // <-- Ubah bagian ini jadi kosong
+      );
+
+      // Pindah ke halaman Login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+
+      // Kasih pesan sukses
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Akun berhasil dibuat! Silakan login.',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Color(0xFFCCFF00),
+        ),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart'; // 1. Import provider
+import '../viewmodels/run_viewmodel.dart'; // 2. Import ViewModel
 import 'package:catat_lari/models/run_model.dart';
 
 class EditRunScreen extends StatefulWidget {
@@ -89,21 +91,31 @@ class _EditRunScreenState extends State<EditRunScreen> {
     );
   }
 
+  // 3. UBAH FUNGSI INI
   void _updateRun() {
     if (_formKey.currentState!.validate()) {
-      // Tahap 3 baru update ke DB. Sekarang balik ke Home aja
+      // Bikin object data lari yg diupdate, panggil ID dari widget.run.id
+      final updatedRun = RunModel(
+        id: widget
+            .run
+            .id, // Penting! ID nggak boleh berubah biar ketahuan data mana yg diedit
+        date: _dateController.text,
+        distance: double.parse(_distanceController.text),
+        duration: _durationController.text,
+      );
+
+      // Kirim data baru ke ViewModel untuk di-update
+      context.read<RunViewModel>().updateRun(updatedRun);
+
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-        content: Text(
-          'Data lari berhasil diupdate!',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+          content: Text(
+            'Data lari berhasil diupdate!',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
+          backgroundColor: Color(0xFFCCFF00),
         ),
-        backgroundColor: Color(0xFFCCFF00),
-      ),
       );
     }
   }
@@ -214,7 +226,7 @@ class _EditRunScreenState extends State<EditRunScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Tombol CATAT LARI
+              // Tombol CATAT LARI (EDIT)
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -228,7 +240,7 @@ class _EditRunScreenState extends State<EditRunScreen> {
                     ),
                   ),
                   child: const Text(
-                    'CATAT LARI',
+                    'SIMPAN PERUBAHAN',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),

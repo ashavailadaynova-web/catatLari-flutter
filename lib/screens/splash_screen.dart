@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
-import 'main_page.dart'; // Ganti ke nama file Home kalian nanti
-import 'onboarding_screen.dart'; // tambah ini
+import 'package:provider/provider.dart'; // 1. Import Provider
+import '../viewmodels/auth_viewmodel.dart'; // 2. Import AuthViewModel
+import 'main_page.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,10 +18,24 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
+      if (!mounted) return;
+
+      // 3. Cek status login dari AuthViewModel
+      final authVM = context.read<AuthViewModel>();
+
+      if (authVM.currentUserEmail != null) {
+        // Kalau ada email (udah login), ke Home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      } else {
+        // Kalau belum login, ke Onboarding
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        );
+      }
     });
   }
 
@@ -39,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 60,
                 fontWeight: FontWeight.w900,
                 fontStyle: FontStyle.italic,
-                color: const Color(0xFFCCFF00), // Ijo neon
+                color: const Color(0xFFCCFF00),
                 shadows: [
                   Shadow(
                     blurRadius: 20.0,

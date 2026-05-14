@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/run_viewmodel.dart';
+import '../viewmodels/profile_viewmodel.dart';
 import 'add_run_screen.dart';
 import 'edit_run_screen.dart';
-import 'package:catat_lari/models/run_model.dart';
+import '../models/run_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<RunModel> runs = RunModel.dummyData; // Data dummy
-    final bool hasData = runs.isNotEmpty; // true = ada data, false = kosong
-    final userEmail = "rania@gmail.com"; // Nanti ambil dari SharedPrefs Tahap 3
+    // Memantau perubahan data secara real-time
+    final runProvider = context.watch<RunViewModel>();
+    final profileProvider = context.watch<ProfileViewModel>();
+
+    final List<RunModel> runs = runProvider.runs;
+    final bool hasData = runs.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -23,9 +29,9 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Email User
+                  // Nama User Dinamis dari ProfileViewModel
                   Text(
-                    userEmail,
+                    profileProvider.userName,
                     style: GoogleFonts.inter(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -39,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Card JARAK TEMPUH MINGGU INI
+                  // Card JARAK TEMPUH (Dinamis menggunakan getter totalDistance)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -51,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'JARAK TEMPUH MINGGU INI',
+                          'TOTAL JARAK TEMPUH',
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 12,
@@ -64,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                           textBaseline: TextBaseline.alphabetic,
                           children: [
                             Text(
-                              hasData ? '12.5' : '0',
+                              runProvider.totalDistance.toStringAsFixed(1),
                               style: const TextStyle(
                                 fontSize: 48,
                                 fontWeight: FontWeight.bold,
@@ -85,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           hasData
-                              ? 'Bagus! Kamu sudah lari 3 kali\nminggu ini.'
+                              ? 'Bagus! Kamu sudah lari ${runs.length} kali.'
                               : 'Yuk mulai lari pertamamu!',
                           style: TextStyle(
                             color: Colors.grey[400],
@@ -110,27 +116,30 @@ class HomeScreen extends StatelessWidget {
                           letterSpacing: 1,
                         ),
                       ),
-                      if (hasData)
-                        Text(
-                          'LIHAT SEMUA',
-                          style: TextStyle(
-                            color: const Color(0xFFCCFF00),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
 
-                  // Tampilan kalo ada data VS kosong
+                  // List Aktivitas (Dinamis: Jika ada data, tampilkan semua pakai ListView)
                   hasData
-                      ? _buildRunCard(context, runs.first)
+                      ? ListView.builder(
+                          shrinkWrap:
+                              true, // Biar gak error di dalam ScrollView
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: runs.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildRunCard(context, runs[index]),
+                            );
+                          },
+                        )
                       : _buildEmptyState(),
                 ],
               ),
             ),
-            // Floating Action Button +
+
+            // FAB (Floating Action Button)
             Positioned(
               bottom: 24,
               right: 24,
@@ -151,7 +160,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Widget kalo ada data
+  // Widget Card Lari Dinamis
   Widget _buildRunCard(BuildContext context, RunModel run) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -166,15 +175,14 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '14/05/2026',
+                run.date, // DATA ASLI DARI DB
                 style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
-              // Tombol Hapus
               GestureDetector(
-                onTap: () => _showDeleteDialog(context),
+                onTap: () => _showDeleteDialog(context, run),
                 child: Icon(
                   Icons.delete_outline,
-                  color: Colors.grey[600],
+                  color: Colors.red[300], // Merah biar jelas itu tombol hapus
                   size: 20,
                 ),
               ),
@@ -183,7 +191,6 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              // Jarak Lari
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -193,9 +200,9 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '3 M',
-                    style: TextStyle(
-                      color: const Color(0xFFCCFF00),
+                    '${run.distance} KM', // DATA ASLI DARI DB
+                    style: const TextStyle(
+                      color: Color(0xFFCCFF00),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -203,7 +210,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 40),
-              // Durasi
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -213,9 +219,9 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '2:16:10',
-                    style: TextStyle(
-                      color: const Color(0xFFCCFF00),
+                    run.duration, // DATA ASLI DARI DB
+                    style: const TextStyle(
+                      color: Color(0xFFCCFF00),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -223,7 +229,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              // Tombol EDIT
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -246,7 +251,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Widget kalo kosong
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
@@ -277,11 +281,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Dialog konfirmasi hapus - TAHAP 1 & 2 CUMA FAKE
-  void _showDeleteDialog(BuildContext context) {
+  void _showDeleteDialog(BuildContext context, RunModel run) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.grey[900],
           title: const Text(
@@ -289,23 +292,25 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            'Data lari ini akan dihapus permanen.',
+            'Data lari tanggal ${run.date} akan dihapus permanen.',
             style: TextStyle(color: Colors.grey[400]),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Tutup dialog
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text('BATAL', style: TextStyle(color: Colors.grey[500])),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Tutup dialog dulu
-                // Kasih feedback kalo ini baru UI doang
+                Navigator.pop(dialogContext);
+                // PASTIKAN ID TIDAK NULL
+                if (run.id != null) {
+                  context.read<RunViewModel>().deleteRun(run.id!);
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Fitur hapus data aktif di Tahap 3'),
-                    backgroundColor: Colors.orange,
-                    duration: Duration(seconds: 2),
+                    content: Text('Aktivitas berhasil dihapus!'),
+                    backgroundColor: Colors.redAccent,
                   ),
                 );
               },

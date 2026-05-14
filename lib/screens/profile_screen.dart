@@ -1,29 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'splash_screen.dart'; // Buat logout
-import 'edit_profile_screen.dart'; //Edit profile
+import 'package:provider/provider.dart'; // 1. Import Provider
+import '../viewmodels/profile_viewmodel.dart'; // 2. Import ProfileViewModel
+import '../viewmodels/run_viewmodel.dart'; // 3. Import RunViewModel buat ambil angka lari
+import '../viewmodels/auth_viewmodel.dart';
+import 'onboarding_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // Data dummy, nanti Tahap 3 ambil dari DB
-  final String name = "Lee Jeno";
-  final String joinDate = "Bergabung sejak 2020 • Surabaya";
-  final double totalDistance = 0;
-  final int totalRuns = 0;
-  final String avgPace = "0'00";
-
   void _logout(BuildContext context) {
-    // Hapus semua stack navigasi & balik ke Splash
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const SplashScreen()),
-      (route) => false, // Hapus semua route sebelumnya
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // User tidak bisa klik di luar dialog untuk menutupnya
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Keluar Akun',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Apakah kamu yakin ingin logout dari aplikasi?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('BATAL', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                // 1. Jalankan proses hapus data di ViewModel
+                await context.read<AuthViewModel>().logout(context);
+
+                // 2. Tutup dialognya dulu
+                if (context.mounted) Navigator.pop(dialogContext);
+
+                // 3. Pindah ke halaman Login dan hapus semua history halaman
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OnboardingScreen(),
+                    ),
+                    (route) =>
+                        false, // Ini yang bikin user gak bisa balik lagi ke profil
+                  );
+                }
+              },
+              child: const Text('KELUAR'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // 4. AMBIL DATA DARI VIEWMODEL
+    final profileVM = context.watch<ProfileViewModel>();
+    final runVM = context.watch<RunViewModel>();
+
+    // Hitung total dari data asli
+    final int totalRuns = runVM.runs.length;
+    final double totalDistance = runVM.runs.fold(
+      0.0,
+      (sum, run) => sum + run.distance,
+    );
+    final String avgPace =
+        "0'00"; // Ini dibiarin dummy dulu karena butuh parsing durasi yg lumayan panjang
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -39,9 +96,7 @@ class ProfileScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: const Color(0xFFCCFF00), width: 3),
                   image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://i.pravatar.cc/150?img=3',
-                    ), // Ganti pake asset kalian
+                    image: NetworkImage('https://i.pravatar.cc/150?img=3'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -50,7 +105,7 @@ class ProfileScreen extends StatelessWidget {
 
               // Nama
               Text(
-                name,
+                profileVM.userName, // 5. Ambil nama dari ViewModel
                 style: GoogleFonts.inter(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -59,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                joinDate,
+                'Bergabung sejak 2026 • ${profileVM.location}', // 6. Ambil lokasi dari ViewModel
                 style: TextStyle(color: Colors.grey[500], fontSize: 14),
               ),
               const SizedBox(height: 32),
@@ -89,7 +144,7 @@ class ProfileScreen extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          '${totalDistance.toInt()}',
+                          '${totalDistance.toInt()}', // 7. Otomatis hitung total KM
                           style: const TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
@@ -136,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '$totalRuns',
+                            '$totalRuns', // 8. Otomatis hitung berapa kali lari
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -217,7 +272,8 @@ class ProfileScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: () => _logout(context),
+                  onPressed: () =>
+                      _logout(context), // <--- Memanggil fungsi di atas
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: BorderSide(color: Colors.grey[700]!),
