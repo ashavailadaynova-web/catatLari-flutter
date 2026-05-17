@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // 1. Import provider
-import '../viewmodels/profile_viewmodel.dart'; // 2. Import Profile ViewModel
+import 'package:provider/provider.dart';
+
+import '../viewmodels/profile_viewmodel.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -16,9 +17,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // 3. Ambil data dari ViewModel buat ditampilin di form
+
+    // AMBIL DATA DARI VIEWMODEL
     final profile = context.read<ProfileViewModel>();
+
     _nameController = TextEditingController(text: profile.userName);
+
     _locationController = TextEditingController(text: profile.location);
   }
 
@@ -26,6 +30,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _locationController.dispose();
+
     super.dispose();
   }
 
@@ -33,71 +38,115 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
       appBar: AppBar(
-        title: const Text("Edit Profile"),
+        title: const Text(
+          "Edit Profile",
+          style: TextStyle(color: Colors.white),
+        ),
+
         backgroundColor: Colors.black,
+
+        iconTheme: const IconThemeData(color: Color(0xFFD4FF00)),
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(20.0),
+
         child: Column(
           children: [
+            // INPUT NAMA
             TextField(
               controller: _nameController,
+
               style: const TextStyle(color: Colors.white),
+
               decoration: const InputDecoration(
                 labelText: "Full Name",
+
                 labelStyle: TextStyle(color: Color(0xFFD4FF00)),
+
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),
                 ),
+
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFD4FF00)),
+                ),
               ),
             ),
+
             const SizedBox(height: 20),
+
+            // INPUT LOKASI
             TextField(
               controller: _locationController,
+
               style: const TextStyle(color: Colors.white),
+
               decoration: const InputDecoration(
                 labelText: "Location",
+
                 labelStyle: TextStyle(color: Color(0xFFD4FF00)),
+
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),
                 ),
+
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFD4FF00)),
+                ),
               ),
             ),
+
             const SizedBox(height: 40),
-            // Tombol Simpan
+
+            // BUTTON SAVE
             SizedBox(
               width: double.infinity,
+
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD4FF00),
+
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                onPressed: () {
-                  // 4. Update data profil ke ViewModel
-                  context.read<ProfileViewModel>().updateProfile(
+
+                onPressed: () async {
+                  // UPDATE PROFILE
+                  await context.read<ProfileViewModel>().updateProfile(
                     _nameController.text,
                     _locationController.text,
                   );
 
-                  Navigator.pop(context);
+                  // KEMBALI KE PROFILE
+                  if (context.mounted) {
+                    Navigator.pop(context);
 
-                  // Opsional: Kasih feedback snackbar
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Profil berhasil diperbarui!',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                    // SNACKBAR
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Profil berhasil diperbarui!',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
+
+                        backgroundColor: Color(0xFFD4FF00),
                       ),
-                      backgroundColor: Color(0xFFD4FF00),
-                    ),
-                  );
+                    );
+                  }
                 },
+
                 child: const Text(
                   "SAVE CHANGES",
-                  style: TextStyle(color: Colors.black),
+
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

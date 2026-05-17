@@ -1,52 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import 'profile_viewmodel.dart'; // Pastikan import ini benar sesuai folder kamu
+
+import 'profile_viewmodel.dart';
 
 class AuthViewModel extends ChangeNotifier {
   String? currentUserEmail;
 
-  // Fungsi Login yang sudah diperbaiki
+  // LOGIN
   Future<bool> login(
     BuildContext context,
     String email,
     String password,
   ) async {
-    // 1. Simulasi: Anggap login berhasil dan kita dapat data nama dari "database"
-    // Karena ini simulasi, kita ambil nama dari depan email saja
-    String loggedInUserName = email.split('@')[0];
-
     try {
-      // 2. SIMPAN KE SHARED PREFERENCES (Biar awet gak hilang pas restart)
+      // AMBIL NAMA DARI EMAIL
+      String loggedInUserName = email.split('@')[0];
+
+      // SHARED PREFERENCES
       final prefs = await SharedPreferences.getInstance();
+
+      // SIMPAN DATA LOGIN
       await prefs.setString('user_name', loggedInUserName);
+
       await prefs.setString('user_email', email);
+
+      // STATUS LOGIN
+      await prefs.setBool('is_logged_in', true);
 
       currentUserEmail = email;
 
-      // 3. UPDATE PROFILE VIEW MODEL SEKARANG JUGA
-      // Ini kuncinya supaya Home langsung berubah namanya tanpa nunggu restart
+      // UPDATE PROFILE VIEWMODEL
       if (context.mounted) {
-        Provider.of<ProfileViewModel>(context, listen: false).loadProfile();
+        await Provider.of<ProfileViewModel>(
+          context,
+          listen: false,
+        ).loadProfile();
       }
 
       notifyListeners();
+
       return true;
     } catch (e) {
       debugPrint("Login Error: $e");
+
       return false;
     }
   }
 
-  // Tambahkan fungsi Logout sekalian biar lengkap
+  // LOGOUT
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Hapus semua data
+
+    // HAPUS SESSION LOGIN SAJA
+    await prefs.remove('is_logged_in');
+
     currentUserEmail = null;
 
+    // REFRESH PROFILE
     if (context.mounted) {
-      Provider.of<ProfileViewModel>(context, listen: false).loadProfile();
+      await Provider.of<ProfileViewModel>(context, listen: false).loadProfile();
     }
+
     notifyListeners();
   }
 }
