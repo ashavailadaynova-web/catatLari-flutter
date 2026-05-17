@@ -3,12 +3,31 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/run_viewmodel.dart';
 import '../viewmodels/profile_viewmodel.dart';
+import '../viewmodels/auth_viewmodel.dart'; // Impor AuthViewModel untuk mengambil email aktif
 import 'add_run_screen.dart';
 import 'edit_run_screen.dart';
 import '../models/run_model.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // TRIGER PENGAMBILAN DATA BERDASARKAN EMAIL SAAT HALAMAN DIBUKA
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authVM = context.read<AuthViewModel>();
+      final emailAktif = authVM.currentUserEmail;
+
+      // Panggil fetchRuns khusus untuk akun yang login saat ini saja
+      context.read<RunViewModel>().fetchRuns(emailAktif);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +97,12 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(
+                            const Text(
                               'KM',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFFCCFF00),
+                                color: Color(0xFFCCFF00),
                               ),
                             ),
                           ],
@@ -106,8 +125,8 @@ class HomeScreen extends StatelessWidget {
                   // AKTIVITAS TERBARU
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
+                    children: const [
+                      Text(
                         'AKTIVITAS TERBARU',
                         style: TextStyle(
                           color: Colors.white,
@@ -120,11 +139,10 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // List Aktivitas (Dinamis: Jika ada data, tampilkan semua pakai ListView)
+                  // List Aktivitas (Dinamis)
                   hasData
                       ? ListView.builder(
-                          shrinkWrap:
-                              true, // Biar gak error di dalam ScrollView
+                          shrinkWrap: true, 
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: runs.length,
                           itemBuilder: (context, index) {
@@ -175,14 +193,14 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                run.date, // DATA ASLI DARI DB
+                run.date,
                 style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
               GestureDetector(
                 onTap: () => _showDeleteDialog(context, run),
                 child: Icon(
                   Icons.delete_outline,
-                  color: Colors.red[300], // Merah biar jelas itu tombol hapus
+                  color: Colors.red[300],
                   size: 20,
                 ),
               ),
@@ -200,7 +218,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${run.distance} KM', // DATA ASLI DARI DB
+                    '${run.distance} KM',
                     style: const TextStyle(
                       color: Color(0xFFCCFF00),
                       fontSize: 24,
@@ -219,7 +237,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    run.duration, // DATA ASLI DARI DB
+                    run.duration,
                     style: const TextStyle(
                       color: Color(0xFFCCFF00),
                       fontSize: 24,
@@ -303,7 +321,6 @@ class HomeScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-                // PASTIKAN ID TIDAK NULL
                 if (run.id != null) {
                   context.read<RunViewModel>().deleteRun(run.id!);
                 }

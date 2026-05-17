@@ -1,79 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-
+import 'main_viewmodel.dart'; 
+import '../models/database_helper.dart'; 
 import 'profile_viewmodel.dart';
+import 'run_viewmodel.dart'; 
 
 class AuthViewModel extends ChangeNotifier {
   String? currentUserEmail;
 
-  // LOGIN
+  // 1. FUNGSI REGISTRASI
+  Future<bool> register(String name, String email, String password) async {
+    try {
+      await DatabaseHelper.registerUser(name, email, password);
+      return true;
+    } catch (e) {
+      debugPrint("Register Error: $e");
+      return false;
+    }
+  }
+
+  // 2. FUNGSI LOGIN
   Future<bool> login(
     BuildContext context,
     String email,
     String password,
   ) async {
     try {
-      // AMBIL NAMA DARI EMAIL
-      String loggedInUserName = email.split('@')[0];
+      final user = await DatabaseHelper.checkLogin(email, password);
 
-      // SHARED PREFERENCES
+      if (user == null) {
+        return false; 
+      }
+
+      String loggedInUserName = user['name'] ?? email.split('@')[0];
+
       final prefs = await SharedPreferences.getInstance();
-
-      // HAPUS DATA USER SEBELUMNYA
-      await prefs.remove('user_name');
-      await prefs.remove('user_email');
-      await prefs.remove('location');
-      await prefs.remove('profile_image');
-
-      // SIMPAN DATA USER BARU
       await prefs.setString('user_name', loggedInUserName);
       await prefs.setString('user_email', email);
-
-      // STATUS LOGIN
       await prefs.setBool('is_logged_in', true);
 
       currentUserEmail = email;
 
-      // REFRESH PROFILE VIEWMODEL
+      // SINKRONISASI PROFILE SAAT LOGIN
       if (context.mounted) {
-        await Provider.of<ProfileViewModel>(
-          context,
-          listen: false,
-        ).loadProfile();
+        await Provider.of<ProfileViewModel>(context, listen: false).loadProfile(currentUserEmail);  
       }
 
       notifyListeners();
-
       return true;
     } catch (e) {
       debugPrint("Login Error: $e");
-
       return false;
     }
   }
 
-  // LOGOUT
+  // 3. FUNGSI LOGOUT
   Future<void> logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    // HAPUS SEMUA DATA USER
-    await prefs.remove('user_name');
-    await prefs.remove('user_email');
-    await prefs.remove('location');
-    await prefs.remove('profile_image');
-    await prefs.remove('is_logged_in');
+      await prefs.setBool('is_logged_in', false);
+      await prefs.remove('user_email');
+      await prefs.remove('user_name');
 
-    currentUserEmail = null;
+      currentUserEmail = null;
 
-    // REFRESH PROFILE VIEWMODEL
-    if (context.mounted) {
-      await Provider.of<ProfileViewModel>(
-        context,
-        listen: false,
-      ).loadProfile();
+      if (context.mounted) {
+        // Bersihkan data profil (diisi null agar siap untuk user baru)
+        await Provider.of<ProfileViewModel>(context, listen: false).loadProfile(null);
+        
+        // Bersihkan data riwayat lari di state management
+        Provider.of<RunViewModel>(context, listen: false).clearRuns();
+        
+        // Reset navigasi halaman utama ke index 0 (Halaman Home)
+        Provider.of<MainViewModel>(context, listen: false).setIndex(0);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Logout Error: $e");
     }
-
-    notifyListeners();
   }
 }

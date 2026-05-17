@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/profile_viewmodel.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -112,11 +112,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
 
+               // MASUKKAN KODE INI PADA ONPRESSED BUTTON SAVE CHANGES KAMU
                 onPressed: () async {
-                  // UPDATE PROFILE
-                  await context.read<ProfileViewModel>().updateProfile(
+                  // 1. Ambil email user yang sedang aktif dari AuthViewModel
+                  final authVM = context.read<AuthViewModel>();
+                  final activeEmail = authVM.currentUserEmail;
+                  final profileVM = context.read<ProfileViewModel>();
+
+                  // 2. Kirim email beserta data baru ke ProfileViewModel (Sertakan profileVM.photoPath jika ada)
+                  await profileVM.updateProfile(
+                    activeEmail,
                     _nameController.text,
                     _locationController.text,
+                    profileVM.photoPath, // <--- Parameter ke-4 untuk mencegah foto ter-reset jadi null saat save nama
                   );
 
                   // KEMBALI KE PROFILE
@@ -133,13 +141,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         backgroundColor: Color(0xFFD4FF00),
                       ),
                     );
                   }
                 },
-
                 child: const Text(
                   "SAVE CHANGES",
 

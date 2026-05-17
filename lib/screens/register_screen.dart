@@ -60,31 +60,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // 4. UBAH FUNGSI CREATE ACCOUNT
-  void _createAccount() {
+  void _createAccount() async {
     if (_formKey.currentState!.validate()) {
-      // Lokasi dikosongin dulu karena user belum ngisi
-      context.read<ProfileViewModel>().updateProfile(
+      // 1. Panggil fungsi register di AuthViewModel untuk disimpan ke SQLite
+      bool isRegistered = await context.read<AuthViewModel>().register(
         _nameController.text,
-        "", // <-- Ubah bagian ini jadi kosong
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      // Pindah ke halaman Login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      if (!mounted) return; // Ini return yang benar, digunakan untuk safety check widget
 
-      // Kasih pesan sukses
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Akun berhasil dibuat! Silakan login.',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+      if (isRegistered) {
+        final emailText = _emailController.text.trim();
+
+      await context.read<ProfileViewModel>().updateProfile(
+            emailText,
+            emailText.split('@')[0], // Nama default diambil dari depan email
+            "Indonesia",             // Lokasi default
+            null,                    // Belum ada foto profil
+          );
+
+        // 3. Pindah ke halaman Login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+
+        // Beri tahu pesan sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Akun berhasil dibuat! Silakan login.',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Color(0xFFCCFF00),
           ),
-          backgroundColor: Color(0xFFCCFF00),
-        ),
-      );
+        );
+      } else {
+        // Jika gagal (misal email sudah pernah terdaftar)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registrasi Gagal! Periksa kembali data atau email Anda.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
