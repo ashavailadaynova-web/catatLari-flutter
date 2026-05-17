@@ -3,7 +3,7 @@ class RunModel {
   final double distance; // dalam KM
   final String duration; // format "HH:MM:SS"
   final String date; // format "dd/MM/yyyy"
-  final String? notes; // Tahap 3 baru kepake
+  final String? notes; 
 
   RunModel({
     this.id,

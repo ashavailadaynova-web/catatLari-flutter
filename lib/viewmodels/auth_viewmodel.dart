@@ -20,9 +20,12 @@ class AuthViewModel extends ChangeNotifier {
       // SHARED PREFERENCES
       final prefs = await SharedPreferences.getInstance();
 
+      // HAPUS DATA USER SEBELUMNYA
+      await prefs.remove('location');
+      await prefs.remove('profile_image');
+
       // SIMPAN DATA LOGIN
       await prefs.setString('user_name', loggedInUserName);
-
       await prefs.setString('user_email', email);
 
       // STATUS LOGIN
@@ -52,7 +55,7 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // HAPUS SESSION LOGIN SAJA
+    // HAPUS STATUS LOGIN
     await prefs.remove('is_logged_in');
 
     currentUserEmail = null;
