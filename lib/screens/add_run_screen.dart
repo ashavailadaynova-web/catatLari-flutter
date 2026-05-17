@@ -16,15 +16,18 @@ class _AddRunScreenState extends State<AddRunScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
   final _distanceController = TextEditingController();
-  final _durationController = TextEditingController();
-
+  final _hourController = TextEditingController();
+  final _minuteController = TextEditingController();
+  final _secondController = TextEditingController();
   DateTime? _selectedDate;
 
   @override
   void dispose() {
     _dateController.dispose();
     _distanceController.dispose();
-    _durationController.dispose();
+    _hourController.dispose();
+    _minuteController.dispose();
+    _secondController.dispose();
     super.dispose();
   }
 
@@ -85,7 +88,10 @@ class _AddRunScreenState extends State<AddRunScreen> {
         // id dikosongkan karena akan diisi otomatis oleh Database (AUTOINCREMENT)
         date: _dateController.text,
         distance: double.tryParse(_distanceController.text) ?? 0.0,
-        duration: _durationController.text,
+        duration:
+        '${_hourController.text.padLeft(2, '0')}:'
+        '${_minuteController.text.padLeft(2, '0')}:'
+        '${_secondController.text.padLeft(2, '0')}',
         notes: "", // Kasih string kosong biar nggak null
       );
 
@@ -183,19 +189,40 @@ class _AddRunScreenState extends State<AddRunScreen> {
               const SizedBox(height: 16),
 
               // Durasi
-              TextFormField(
-                controller: _durationController,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.datetime,
-                decoration: _inputDecoration(
-                  'Durasi (hh:mm:ss)',
-                  Icons.timer_outlined,
+            Row(
+              children: [
+                Expanded(
+                child: TextFormField(
+                  controller: _hourController,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                  decoration: _inputDecoration('Jam', Icons.timer_outlined),
+                  ),
+            ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+              child: TextFormField(
+              controller: _minuteController,
+              style: const TextStyle(color: Colors.white),
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration('Menit', Icons.schedule),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Isi durasi lari';
-                  return null;
-                },
+            ),
+
+            const SizedBox(width: 10),
+
+          Expanded(
+            child: TextFormField(
+              controller: _secondController,
+              style: const TextStyle(color: Colors.white),
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration('Detik', Icons.av_timer),
               ),
+            ),
+      ],
+    ),
               const SizedBox(height: 16),
 
               // Teks PASTIKAN DATA SUDAH SESUAI
