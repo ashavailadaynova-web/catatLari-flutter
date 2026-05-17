@@ -1,6 +1,6 @@
 # Aplikasi Catat Lari Berbasis Flutter
 
-## NAMA ANGGOTA KELOMPOK 4
+## NAMA ANGGOTA KELOMPOK GUNUNG FUJI
 1. Daynova Ashavaila Ramadhani  (24082010050)
 2. Meineza Dilga Putri Nabela   (24082010051)
 3. Vina Dwi Maulita             (24082010074)
