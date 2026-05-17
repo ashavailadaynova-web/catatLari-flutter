@@ -21,10 +21,12 @@ class AuthViewModel extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
 
       // HAPUS DATA USER SEBELUMNYA
+      await prefs.remove('user_name');
+      await prefs.remove('user_email');
       await prefs.remove('location');
       await prefs.remove('profile_image');
 
-      // SIMPAN DATA LOGIN
+      // SIMPAN DATA USER BARU
       await prefs.setString('user_name', loggedInUserName);
       await prefs.setString('user_email', email);
 
@@ -33,7 +35,7 @@ class AuthViewModel extends ChangeNotifier {
 
       currentUserEmail = email;
 
-      // UPDATE PROFILE VIEWMODEL
+      // REFRESH PROFILE VIEWMODEL
       if (context.mounted) {
         await Provider.of<ProfileViewModel>(
           context,
@@ -55,14 +57,21 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // HAPUS STATUS LOGIN
+    // HAPUS SEMUA DATA USER
+    await prefs.remove('user_name');
+    await prefs.remove('user_email');
+    await prefs.remove('location');
+    await prefs.remove('profile_image');
     await prefs.remove('is_logged_in');
 
     currentUserEmail = null;
 
-    // REFRESH PROFILE
+    // REFRESH PROFILE VIEWMODEL
     if (context.mounted) {
-      await Provider.of<ProfileViewModel>(context, listen: false).loadProfile();
+      await Provider.of<ProfileViewModel>(
+        context,
+        listen: false,
+      ).loadProfile();
     }
 
     notifyListeners();
