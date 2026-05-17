@@ -1,4 +1,11 @@
 # Aplikasi Catat Lari Berbasis Flutter
+
+## NAMA ANGGOTA KELOMPOK 4
+1. Daynova Ashavaila Ramadhani  (24082010050)
+2. Meineza Dilga Putri Nabela   (24082010051)
+3. Vina Dwi Maulita             (24082010074)
+4. Rania Zahiyah Jasmine        (24082010081)
+
 ## 📌 Deskripsi Aplikasi
   Catat Lari adalah aplikasi mobile berbasis Flutter yang digunakan untuk mencatat aktivitas lari pengguna secara praktis dan terstruktur. Aplikasi ini memungkinkan pengguna untuk menyimpan riwayat lari, melihat statistik aktivitas, mengelola profil, serta menghitung average pace secara otomatis berdasarkan durasi dan jarak tempuh.
 
@@ -44,9 +51,5 @@ Menggunakan:
 - SQLite (`sqflite`)
 - Shared Preferences
 
-## NAMA ANGGOTA KELOMPOK 
-1. Daynova Ashavaila Ramadhani  (24082010050)
-2. Meineza Dilga Putri Nabela   (24082010051)
-3. Vina Dwi Maulita             (24082010074)
-4. Rania Zahiyah Jasmine        (24082010081)
+
 
